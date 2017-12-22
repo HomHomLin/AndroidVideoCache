@@ -1,6 +1,15 @@
 buildscript {
     repositories {
+
         jcenter()
+        mavenCentral()
+        maven {
+            url "http://192.168.10.230:8081/nexus/content/repositories/releases"
+        }
+        maven {
+            url "http://192.168.10.230:8081/nexus/content/repositories/snapshots"
+        }
+        maven { url "https://dl.bintray.com/thelasterstar/maven/" }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:2.3.1'
@@ -9,6 +18,30 @@ buildscript {
 
 allprojects {
     repositories {
+        //mavenLocal()
+        maven {
+            // All of React Native (JS, Android binaries) is installed from npm
+            url "../MeetyouReact/node_modules/react-native/android"
+        }
+        maven {
+            url deployUrl
+        }
+        maven {
+            url deployReleaseUrl
+        }
+        maven {
+            url thirdpartyUrl
+        }
+        maven { url "https://dl.bintray.com/thelasterstar/maven/" }
+        mavenCentral()
         jcenter()
     }
+    configurations.all {
+        resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+        resolutionStrategy.cacheDynamicVersionsFor 0, 'seconds'
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
 }

@@ -1,6 +1,7 @@
 package com.danikula.videocache;
 
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.danikula.videocache.headers.EmptyHeadersInjector;
 import com.danikula.videocache.headers.HeaderInjector;
@@ -66,6 +67,7 @@ public class HttpUrlSource implements Source {
 
     @Override
     public synchronized long length() throws ProxyCacheException {
+//        Log.d("meetyou-media", "start read length()");
         if (sourceInfo.length == Integer.MIN_VALUE) {
             fetchContentInfo();
         }
@@ -74,6 +76,7 @@ public class HttpUrlSource implements Source {
 
     @Override
     public void open(long offset) throws ProxyCacheException {
+        long time = System.currentTimeMillis();
         try {
             connection = openConnection(offset, -1);
             String mime = connection.getContentType();
@@ -84,6 +87,7 @@ public class HttpUrlSource implements Source {
         } catch (IOException e) {
             throw new ProxyCacheException("Error opening connection for " + sourceInfo.url + " with offset " + offset, e);
         }
+//        Log.d("meetyou-media", "end open data, cost:" + (System.currentTimeMillis() - time));
     }
 
     private long readSourceAvailableBytes(HttpURLConnection connection, long offset, int responseCode) throws IOException {
@@ -118,11 +122,14 @@ public class HttpUrlSource implements Source {
 
     @Override
     public int read(byte[] buffer) throws ProxyCacheException {
+        long time = System.currentTimeMillis();
         if (inputStream == null) {
             throw new ProxyCacheException("Error reading data from " + sourceInfo.url + ": connection is absent!");
         }
         try {
             return inputStream.read(buffer, 0, buffer.length);
+//            Log.d("meetyou-media", "end read data, cost:" + (System.currentTimeMillis() - time));
+//            return flag;
         } catch (InterruptedIOException e) {
             throw new InterruptedProxyCacheException("Reading source " + sourceInfo.url + " is interrupted", e);
         } catch (IOException e) {
@@ -131,6 +138,7 @@ public class HttpUrlSource implements Source {
     }
 
     private void fetchContentInfo() throws ProxyCacheException {
+        long time = System.currentTimeMillis();
         LOG.debug("Read content info from " + sourceInfo.url);
         HttpURLConnection urlConnection = null;
         InputStream inputStream = null;
@@ -150,6 +158,8 @@ public class HttpUrlSource implements Source {
                 urlConnection.disconnect();
             }
         }
+//        Log.d("meetyou-media", "end fetch content length, cost:" + (System.currentTimeMillis() - time));
+
     }
 
     private HttpURLConnection openConnection(long offset, int timeout) throws IOException, ProxyCacheException {
@@ -190,6 +200,7 @@ public class HttpUrlSource implements Source {
     }
 
     public synchronized String getMime() throws ProxyCacheException {
+//        Log.d("meetyou-media", "start read getMime()");
         if (TextUtils.isEmpty(sourceInfo.mime)) {
             fetchContentInfo();
         }
